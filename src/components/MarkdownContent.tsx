@@ -140,5 +140,9 @@ function resolveAssetPath(src: string | undefined, assetBasePath: string) {
     return src
   }
 
-  return `${assetBasePath}${src.replace(/^\.\//, '')}`
+  const baseUrl = import.meta.env.BASE_URL.replace(/\/+$/, '')
+  const normalizedAssetBasePath = assetBasePath.replace(/^\/+|\/+$/g, '')
+  const normalizedSrc = src.replace(/^\.\//, '')
+
+  return `${baseUrl}/${normalizedAssetBasePath}/${normalizedSrc}`
 }
