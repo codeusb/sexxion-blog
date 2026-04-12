@@ -6,6 +6,8 @@ import { SiteHeader } from "./components/SiteHeader";
 import { allPosts } from "./lib/blog";
 import "./App.css";
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 function getInitialTheme() {
   if (typeof window === "undefined") {
     return "light" as const;
@@ -21,9 +23,31 @@ function getInitialTheme() {
     : "light";
 }
 
-function getCurrentPath() {
-  const normalized = window.location.pathname.replace(/^\/+|\/+$/g, "");
+function normalizePathname(pathname: string) {
+  const basePath = BASE_URL.replace(/\/+$/, "");
+  const withoutBase =
+    basePath && basePath !== "/" && pathname.startsWith(basePath)
+      ? pathname.slice(basePath.length) || "/"
+      : pathname;
+
+  const normalized = withoutBase.replace(/^\/+|\/+$/g, "");
   return normalized || "home";
+}
+
+function getCurrentPath() {
+  const redirectedPath = window.sessionStorage.getItem("spa-redirect");
+  if (redirectedPath) {
+    window.sessionStorage.removeItem("spa-redirect");
+    const redirectedUrl = new URL(redirectedPath, window.location.origin);
+    window.history.replaceState(
+      {},
+      "",
+      `${redirectedUrl.pathname}${redirectedUrl.search}${redirectedUrl.hash}`
+    );
+    return normalizePathname(redirectedUrl.pathname);
+  }
+
+  return normalizePathname(window.location.pathname);
 }
 
 function App() {
@@ -53,7 +77,11 @@ function App() {
   }, [currentPost, isAboutPage]);
 
   const navigate = (nextPath: string) => {
-    const targetPath = nextPath === "home" ? "/" : `/${nextPath}`;
+    const basePath = BASE_URL.replace(/\/+$/, "");
+    const targetPath =
+      nextPath === "home"
+        ? `${basePath || "/"}${basePath ? "/" : ""}`
+        : `${basePath}/${nextPath}`;
     window.history.pushState({}, "", targetPath);
     setPath(nextPath);
     window.scrollTo({ top: 0, behavior: "auto" });
