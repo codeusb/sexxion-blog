@@ -21,15 +21,6 @@ export const allPosts = Object.entries(markdownModules)
   .map(([path, raw]) => parsePost(path, raw))
   .sort((a, b) => (a.date < b.date ? 1 : -1))
 
-export function getSiblingPost(slug: string, offset: -1 | 1) {
-  const index = allPosts.findIndex((post) => post.slug === slug)
-  if (index === -1) {
-    return undefined
-  }
-
-  return allPosts[index + offset]
-}
-
 function parsePost(path: string, raw: string): BlogPost {
   const slug = deriveSlug(path)
   const { frontmatter, content } = splitFrontmatter(raw)

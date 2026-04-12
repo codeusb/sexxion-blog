@@ -3,7 +3,7 @@ import { AboutPage } from './components/AboutPage'
 import { ArticlePage } from './components/ArticlePage'
 import { HomePage } from './components/HomePage'
 import { SiteHeader } from './components/SiteHeader'
-import { allPosts, getSiblingPost } from './lib/blog'
+import { allPosts } from './lib/blog'
 import './App.css'
 
 function getInitialTheme() {
@@ -78,10 +78,8 @@ function App() {
 
       {currentPost ? (
         <ArticlePage
-          nextPost={getSiblingPost(currentPost.slug, 1)}
           onNavigate={navigate}
           post={currentPost}
-          previousPost={getSiblingPost(currentPost.slug, -1)}
         />
       ) : isAboutPage ? (
         <AboutPage onNavigateHome={() => navigate('home')} />

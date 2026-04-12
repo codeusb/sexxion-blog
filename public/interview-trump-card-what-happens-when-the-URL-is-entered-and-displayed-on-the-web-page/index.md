@@ -1,5 +1,5 @@
 ---
-title: "面试杀手锏——输入 URL 到网页显示，发生了什么"
+title: "输入 URL 到网页显示，发生了什么"
 date: "2026-04-12"
 tags: "interview"
 ---

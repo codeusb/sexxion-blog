@@ -47,11 +47,21 @@ export function MarkdownContent({
               {children}
             </blockquote>
           ),
-          pre: ({ children, ...props }) => (
-            <pre className="code-block" {...props}>
-              {children}
-            </pre>
-          ),
+          pre: ({ children }) => <>{children}</>,
+          code: ({ children, className, ...props }) => {
+            const code = String(children).replace(/\n$/, '')
+            const isBlock = Boolean(className?.startsWith('language-') || code.includes('\n'))
+
+            if (!isBlock) {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              )
+            }
+
+            return <CodeBlock className={className} code={code} />
+          },
           hr: (props) => <hr className="article-rule" {...props} />,
           a: ({ href, children, ...props }) => {
             const isExternal = href?.startsWith('http://') || href?.startsWith('https://')
@@ -81,6 +91,42 @@ export function MarkdownContent({
       >
         {markdown}
       </ReactMarkdown>
+    </div>
+  )
+}
+
+function CodeBlock({
+  className,
+  code,
+}: {
+  className?: string
+  code: string
+}) {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+    } catch {
+      console.error('Failed to copy code')
+    }
+  }
+
+  return (
+    <div className="code-block-shell">
+      <button
+        aria-label="Copy code"
+        className="code-copy-button"
+        onClick={handleCopy}
+        title="Copy code"
+        type="button"
+      >
+        <span className="code-copy-icon" aria-hidden="true">
+          <span className="code-copy-square code-copy-square-back" />
+          <span className="code-copy-square code-copy-square-front" />
+        </span>
+      </button>
+      <pre className="code-block">
+        <code className={className}>{code}</code>
+      </pre>
     </div>
   )
 }
