@@ -677,6 +677,29 @@
   font-size: 0.88rem;
 }
 
+.article-embed-frame {
+  margin-inline: 0;
+}
+
+.article-embed-frame iframe {
+  display: block;
+  width: 100%;
+  height: min(var(--embed-frame-height), 78vh);
+  min-height: 520px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 28px 60px rgba(18, 15, 23, 0.08);
+}
+
+.article-embed-frame figcaption {
+  margin-top: 10px;
+  color: var(--color-muted);
+  font-family: var(--font-serif);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
 .article-rule {
   border: 0;
   border-top: 1px solid var(--color-line);
@@ -756,6 +779,11 @@
   .article-header {
     margin-bottom: 28px;
     width: 100%;
+  }
+
+  .article-embed-frame iframe {
+    height: min(var(--embed-frame-height), 72vh);
+    min-height: 460px;
   }
 
   .article-layout {

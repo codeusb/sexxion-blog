@@ -1,0 +1,906 @@
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  .root {
+    padding: 14px 0;
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+  }
+
+  /* tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tab {
+    padding: 7px 20px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text-secondary);
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    font-weight: 500;
+    border-color: var(--color-border-primary);
+  }
+
+  /* legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .li {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+  .ld {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* === PIPELINE === */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* section header */
+  .sec {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 0 6px 0;
+  }
+  .sec-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .sec-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.02em;
+  }
+
+  /* row */
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin-bottom: 5px;
+  }
+  .rlabel {
+    width: 72px;
+    min-width: 72px;
+    padding: 7px 8px 0 24px;
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .rnodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    flex: 1;
+  }
+
+  /* down arrow */
+  .dn {
+    padding-left: 88px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    opacity: 0.3;
+  }
+
+  /* node chip */
+  .chip {
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 0.5px solid transparent;
+    cursor: pointer;
+    transition:
+      opacity 0.12s,
+      transform 0.1s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chip:hover {
+    opacity: 0.78;
+    transform: translateY(-1px);
+  }
+
+  /* colors */
+  .c-blue {
+    background: #e6f1fb;
+    border-color: #85b7eb;
+    color: #042c53;
+  }
+  .c-purple {
+    background: #eeedfe;
+    border-color: #afa9ec;
+    color: #26215c;
+  }
+  .c-teal {
+    background: #e1f5ee;
+    border-color: #5dcaa5;
+    color: #04342c;
+  }
+  .c-coral {
+    background: #faece7;
+    border-color: #f0997b;
+    color: #4a1b0c;
+  }
+  .c-amber {
+    background: #faeeda;
+    border-color: #ef9f27;
+    color: #412402;
+  }
+  .c-gray {
+    background: #f1efe8;
+    border-color: #b4b2a9;
+    color: #2c2c2a;
+  }
+  .c-green {
+    background: #eaf3de;
+    border-color: #97c459;
+    color: #173404;
+  }
+  .c-pink {
+    background: #fbeaf0;
+    border-color: #ed93b1;
+    color: #4b1528;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .c-blue {
+      background: #042c53;
+      border-color: #185fa5;
+      color: #b5d4f4;
+    }
+    .c-purple {
+      background: #26215c;
+      border-color: #534ab7;
+      color: #cecbf6;
+    }
+    .c-teal {
+      background: #04342c;
+      border-color: #0f6e56;
+      color: #9fe1cb;
+    }
+    .c-coral {
+      background: #4a1b0c;
+      border-color: #993c1d;
+      color: #f5c4b3;
+    }
+    .c-amber {
+      background: #412402;
+      border-color: #854f0b;
+      color: #fac775;
+    }
+    .c-gray {
+      background: #2c2c2a;
+      border-color: #5f5e5a;
+      color: #d3d1c7;
+    }
+    .c-green {
+      background: #173404;
+      border-color: #3b6d11;
+      color: #c0dd97;
+    }
+    .c-pink {
+      background: #4b1528;
+      border-color: #993556;
+      color: #f4c0d1;
+    }
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 400;
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .b-async {
+    background: #faeeda;
+    color: #633806;
+  }
+  .b-sync {
+    background: #e1f5ee;
+    color: #085041;
+  }
+  .b-par {
+    background: #eeedfe;
+    color: #3c3489;
+  }
+  .b-new {
+    background: #eaf3de;
+    color: #3b6d11;
+  }
+  .b-reuse {
+    background: #faeeda;
+    color: #633806;
+  }
+  @media (prefers-color-scheme: dark) {
+    .b-async {
+      background: #412402;
+      color: #fac775;
+    }
+    .b-sync {
+      background: #04342c;
+      color: #9fe1cb;
+    }
+    .b-par {
+      background: #26215c;
+      color: #cecbf6;
+    }
+    .b-new {
+      background: #173404;
+      color: #c0dd97;
+    }
+    .b-reuse {
+      background: #412402;
+      color: #fac775;
+    }
+  }
+
+  /* parallel box */
+  .par {
+    margin: 3px 0 5px 72px;
+    padding: 10px 12px;
+    border: 0.5px dashed var(--color-border-secondary);
+    border-radius: 10px;
+    position: relative;
+  }
+  .par .par-title {
+    position: absolute;
+    top: -9px;
+    left: 10px;
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    background: var(--color-background-primary);
+    padding: 0 5px;
+    font-weight: 500;
+  }
+  .par .rnodes {
+    flex-wrap: wrap;
+  }
+
+  /* correction callout */
+  .note {
+    margin: 4px 0 6px 72px;
+    padding: 8px 12px;
+    background: var(--color-background-secondary);
+    border-left: 2px solid #ef9f27;
+    border-radius: 0 8px 8px 0;
+    font-size: 11.5px;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+  .note strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+  .note code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--color-background-primary);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  /* detail */
+  .detail {
+    margin-top: 14px;
+    padding: 13px 15px;
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-lg);
+    border: 0.5px solid var(--color-border-tertiary);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--color-text-secondary);
+    min-height: 56px;
+  }
+  .detail strong {
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+  .detail code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--color-background-primary);
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+</style>
+
+<div class="root">
+  <div class="tabs">
+    <button class="tab active" onclick="show('mount')">① 初次渲染 Mount</button>
+    <button class="tab" onclick="show('update')">② 点击 setState Update</button>
+  </div>
+
+  <!-- ========== MOUNT ========== -->
+  <div id="p-mount">
+    <div class="legend">
+      <div class="li">
+        <div class="ld" style="background: #378add"></div>
+        JSX/VirtualDOM
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #d85a30"></div>
+        Scheduler
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #7f77dd"></div>
+        Reconciler / Fiber（Render阶段）
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #1d9e75"></div>
+        Renderer（Commit阶段）
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #ba7517"></div>
+        Hooks
+      </div>
+      <span
+        style="
+          font-size: 11px;
+          color: var(--color-text-tertiary);
+          margin-left: 4px;
+        "
+        >点击节点看说明 ↓</span
+      >
+    </div>
+
+    <div class="pipeline">
+      <!-- S1 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #e6f1fb; color: #042c53">1</div>
+        <div class="sec-title">JSX 编译 → ReactElement（Virtual DOM）</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">编译期</div>
+        <div class="rnodes">
+          <div class="chip c-blue" onclick="dm('jsx')">
+            JSX → React.createElement()<span class="badge b-new">编译时</span>
+          </div>
+          <div class="chip c-blue" onclick="dm('vdom')">
+            虚拟DOM（ReactElement）
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S2 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #faece7; color: #4a1b0c">2</div>
+        <div class="sec-title">入口 & Scheduler 调度</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">入口</div>
+        <div class="rnodes">
+          <div class="chip c-gray" onclick="dm('createroot')">
+            ReactDOM.createRoot()
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 4px">
+        <div class="rlabel">调度</div>
+        <div class="rnodes">
+          <div class="chip c-coral" onclick="dm('schedule1')">
+            进入 Scheduler
+          </div>
+          <div class="chip c-coral" onclick="dm('lane1')">Lane 优先级模型</div>
+          <div class="chip c-coral" onclick="dm('concurrent1')">
+            Concurrent 模式 — 时间切片 <span class="badge b-par">⇌ 可中断</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>⚠️ 顺序关键：</strong>Scheduler 在前。<code>createRoot</code>
+        只创建根 Fiber（FiberRoot），其余组件的 Fiber 节点和 Hooks
+        <strong>还没有</strong>。Scheduler 拿到任务后，才把控制权交给 Reconciler
+        开始 render 阶段，Fiber 节点在 render 阶段的 beginWork 里逐个创建，Hooks
+        在执行函数组件时初始化。
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S3 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #eeedfe; color: #26215c">3</div>
+        <div class="sec-title">Render 阶段 — Reconciler（可中断）</div>
+      </div>
+
+      <div class="par">
+        <span class="par-title"
+          >⇌ beginWork（向下）↔ completeWork（向上）深度优先遍历，每个 Fiber
+          节点是一个工作单元</span
+        >
+        <div class="rnodes" style="gap: 6px">
+          <div class="chip c-purple" onclick="dm('fibertree')">
+            beginWork → 创建 Fiber 节点
+          </div>
+          <div class="chip c-purple" onclick="dm('doublebuf')">
+            Fiber 双缓存 — workInProgress 树
+          </div>
+          <div class="chip c-amber" onclick="dm('hooks_init')">
+            执行函数组件 → 初始化 Hooks
+          </div>
+          <div class="chip c-amber" onclick="dm('usestate_m')">
+            useState → mountState，state = 0
+          </div>
+          <div class="chip c-amber" onclick="dm('useeffect_m')">
+            useEffect → mountEffect，收集 effect
+          </div>
+          <div class="chip c-purple" onclick="dm('diff_m')">
+            Diff 算法
+            <span class="badge b-new">首次无旧树，全量 Placement</span>
+          </div>
+          <div class="chip c-purple" onclick="dm('completework_m')">
+            completeWork → 创建离屏真实 DOM
+          </div>
+          <div class="chip c-purple" onclick="dm('effectlist')">
+            subtreeFlags — 收集副作用
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S4 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #e1f5ee; color: #04342c">4</div>
+        <div class="sec-title">Commit 阶段 — Renderer（不可中断，同步）</div>
+      </div>
+
+      <div class="par">
+        <span class="par-title">⇌ 三个子阶段顺序执行</span>
+        <div class="rnodes">
+          <div class="chip c-teal" onclick="dm('bm_m')">
+            before mutation
+            <span class="badge b-sync">getSnapshot / 调度 useEffect</span>
+          </div>
+          <div class="chip c-teal" onclick="dm('mut_m')">
+            mutation → 插入真实 DOM
+            <code style="font-size: 11px">&lt;div&gt;0&lt;/div&gt;</code>
+          </div>
+          <div class="chip c-teal" onclick="dm('lay_m')">
+            layout → useLayoutEffect / componentDidMount
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S5 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #faeeda; color: #412402">5</div>
+        <div class="sec-title">收尾</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">异步</div>
+        <div class="rnodes">
+          <div class="chip c-amber" onclick="dm('ue_m')">
+            useEffect 异步执行
+            <span class="badge b-async">宏任务</span>
+          </div>
+          <div class="chip c-gray" onclick="dm('cur_m')">
+            current = workInProgress
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="dm-detail" class="detail">👆 点击任意节点查看说明</div>
+  </div>
+
+  <!-- ========== UPDATE ========== -->
+  <div id="p-update" style="display: none">
+    <div class="legend">
+      <div class="li">
+        <div class="ld" style="background: #378add"></div>
+        事件系统
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #d85a30"></div>
+        Scheduler
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #7f77dd"></div>
+        Reconciler / Fiber（Render阶段）
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #1d9e75"></div>
+        Renderer（Commit阶段）
+      </div>
+      <div class="li">
+        <div class="ld" style="background: #ba7517"></div>
+        Hooks
+      </div>
+      <span
+        style="
+          font-size: 11px;
+          color: var(--color-text-tertiary);
+          margin-left: 4px;
+        "
+        >点击节点看说明 ↓</span
+      >
+    </div>
+
+    <div class="pipeline">
+      <!-- S1 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #e6f1fb; color: #042c53">1</div>
+        <div class="sec-title">事件触发 → 创建 Update → 入队</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">事件</div>
+        <div class="rnodes">
+          <div class="chip c-blue" onclick="du('click')">
+            onClick → 合成事件 SyntheticEvent
+          </div>
+          <div class="chip c-blue" onclick="du('dispatch')">
+            setCount(1) → dispatchSetState
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 4px">
+        <div class="rlabel">Hooks</div>
+        <div class="rnodes">
+          <div class="chip c-amber" onclick="du('updateobj')">
+            创建 Update 对象 { action: 1 }
+          </div>
+          <div class="chip c-amber" onclick="du('queue')">
+            加入 hook.queue.pending 环形链表
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S2 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #faece7; color: #4a1b0c">2</div>
+        <div class="sec-title">Scheduler 调度（优先级竞争）</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">调度</div>
+        <div class="rnodes">
+          <div class="chip c-coral" onclick="du('lane2')">
+            Lane 模型 — InputContinuousLane / SyncLane
+          </div>
+          <div class="chip c-coral" onclick="du('batch')">
+            批量更新 batchedUpdates — 合并多次 setState
+          </div>
+          <div class="chip c-coral" onclick="du('concurrent2')">
+            Concurrent — 高优先级可打断低优先级
+            <span class="badge b-par">⇌ 并发</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S3 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #eeedfe; color: #26215c">3</div>
+        <div class="sec-title">Render 阶段 — Reconciler（可中断）</div>
+      </div>
+
+      <div class="row">
+        <div class="rlabel">双缓存</div>
+        <div class="rnodes">
+          <div class="chip c-purple" onclick="du('wip')">
+            基于 current 克隆 workInProgress Tree
+            <span class="badge b-reuse">复用未变更节点</span>
+          </div>
+          <div class="chip c-purple" onclick="du('doublebuf2')">
+            Fiber 双缓存 — current ↔ workInProgress
+          </div>
+        </div>
+      </div>
+
+      <div class="par" style="margin-top: 6px">
+        <span class="par-title">⇌ beginWork（向下）↔ completeWork（向上）</span>
+        <div class="rnodes" style="gap: 6px">
+          <div class="chip c-purple" onclick="du('beginwork2')">
+            beginWork — 执行函数组件 App()
+          </div>
+          <div class="chip c-amber" onclick="du('updatestate')">
+            Hooks 更新：遍历 queue.pending → state 0→1
+          </div>
+          <div class="chip c-purple" onclick="du('diff2')">
+            Diff 算法 — key/type 对比，div 可复用
+            <span class="badge b-reuse">复用</span>
+          </div>
+          <div class="chip c-purple" onclick="du('effecttag')">
+            标记 effectTag = Update（text 0→1）
+          </div>
+          <div class="chip c-purple" onclick="du('complete2')">
+            completeWork → updatePayload 收集变更属性
+          </div>
+          <div class="chip c-purple" onclick="du('subtree')">
+            subtreeFlags 向上冒泡
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S4 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #e1f5ee; color: #04342c">4</div>
+        <div class="sec-title">Commit 阶段 — Renderer（不可中断，同步）</div>
+      </div>
+
+      <div class="par">
+        <span class="par-title">⇌ 三个子阶段</span>
+        <div class="rnodes">
+          <div class="chip c-teal" onclick="du('bm2')">
+            before mutation — 调度 useEffect cleanup
+          </div>
+          <div class="chip c-teal" onclick="du('mut2')">
+            mutation → 更新 DOM textContent = "1"
+          </div>
+          <div class="chip c-teal" onclick="du('lay2')">
+            layout → current = workInProgress（指针切换）
+          </div>
+        </div>
+      </div>
+
+      <div class="dn">
+        <svg width="10" height="14">
+          <line
+            x1="5"
+            y1="0"
+            x2="5"
+            y2="10"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+          <polygon points="1,7 5,13 9,7" fill="currentColor" />
+        </svg>
+      </div>
+
+      <!-- S5 -->
+      <div class="sec">
+        <div class="sec-num" style="background: #faeeda; color: #412402">5</div>
+        <div class="sec-title">收尾</div>
+      </div>
+      <div class="row">
+        <div class="rlabel">异步</div>
+        <div class="rnodes">
+          <div class="chip c-amber" onclick="du('cleanup')">
+            cleanup（本例无 return，跳过）<span class="badge b-async"
+              >宏任务</span
+            >
+          </div>
+          <div class="chip c-amber" onclick="du('ue2')">
+            useEffect → console.log("render", 1)
+          </div>
+          <div class="chip c-gray" onclick="du('cur2')">
+            current = workInProgress（旧树成为 alternate 缓存）
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="du-detail" class="detail">👆 点击任意节点查看说明</div>
+  </div>
+</div>
+
+<script>
+  const M = {
+    jsx: '<strong>JSX → React.createElement()</strong><br>这一步发生在<strong>编译期</strong>（Babel/SWC 转换），与 React 运行时无关。<code>&lt;div onClick={fn}&gt;{count}&lt;/div&gt;</code> 变成 <code>React.createElement("div", {onClick:fn}, count)</code>，返回一个普通 JS 对象。',
+    vdom: '<strong>Virtual DOM = ReactElement</strong><br>结构为 <code>{ $$typeof, type, key, ref, props }</code>。它只是对 UI 的"描述意图"，非常轻量。注意：Virtual DOM 是 ReactElement 树，Fiber 树是另一套独立数据结构，两者不同。',
+    createroot:
+      "<strong>ReactDOM.createRoot() 只做一件事</strong><br>创建 <code>FiberRoot</code>（应用全局唯一根，管理调度队列和 current 指针）和 <code>HostRootFiber</code>（第一个 Fiber 节点，作为整棵树的根）。<strong>此时其他 Fiber 节点（App、div）还没有创建</strong>，它们在 render 阶段 beginWork 时才逐个创建。",
+    schedule1:
+      '<strong>scheduleUpdateOnFiber → Scheduler</strong><br><code>root.render()</code> 调用 <code>updateContainer</code>，在 HostRootFiber 上创建第一个 Update 对象并入队，然后调用 <code>scheduleUpdateOnFiber</code> 进入 Scheduler。Scheduler 负责决定"什么时候"开始 render，render 阶段才是 Fiber 节点真正创建的地方。',
+    lane1:
+      '<strong>Lane 模型 — 优先级系统</strong><br>React 18 用 31 位二进制 Lane 表达优先级，每一位是一条"赛道"。初次渲染走 <code>SyncLane</code>（最高优先级），不切片，同步完成。Lane 的优势在于可用位运算同时表达多个优先级，是 Concurrent 调度的基础。',
+    concurrent1:
+      '<strong>Concurrent 模式 — 时间切片</strong><br>render 阶段的 workLoop 每处理完一个 Fiber 节点（一个工作单元），就检查当前时间切片（5ms）是否耗尽。若耗尽则"让步"给浏览器，下一帧继续。初次渲染 SyncLane 不走切片，但架构已支持；Transition/低优先级更新才真正体现并发优势。',
+    fibertree:
+      "<strong>Fiber 节点在 beginWork 里创建</strong><br>Scheduler 把控制权交给 Reconciler 后，workLoop 开始从 HostRootFiber 深度优先遍历，每到一个节点就调用 <code>beginWork</code>。beginWork 发现需要处理 App 组件，此时才调用 <code>createFiberFromElement</code> 创建 App Fiber，再处理 div…依此类推，Fiber 节点是<strong>在 render 阶段逐个创建的</strong>。",
+    doublebuf:
+      "<strong>Fiber 双缓存</strong><br>React 同时维护两棵树：屏幕上的 <code>current</code> 和后台构建的 <code>workInProgress</code>，通过每个节点的 <code>alternate</code> 指针互相引用。首次渲染只有 workInProgress 树，没有 current 树。commit 结束后 <code>FiberRoot.current = workInProgress</code>，两棵树角色互换，无撕裂切换。",
+    hooks_init:
+      "<strong>Hooks 在执行函数组件时初始化</strong><br>beginWork 处理函数组件时会<strong>调用函数本身</strong>（<code>renderWithHooks</code>）。此时 dispatcher 被设置为 <code>HooksDispatcherOnMount</code>，函数体内每次调用 useState/useEffect 都会创建一个 hook 对象并追加到 Fiber 的 <code>memoizedState</code> 链表。<strong>顺序固定，不能写在条件语句中的原因正是如此</strong>。",
+    usestate_m:
+      "<strong>mountState — useState 初始化</strong><br>创建 hook 对象 <code>{ memoizedState: 0, queue: {pending:null, dispatch}, next: null }</code>，挂到 App Fiber 的 hooks 链表。返回 <code>[0, dispatchSetState]</code>。state 值 0 存在 <code>memoizedState</code> 上，不是普通变量。",
+    useeffect_m:
+      "<strong>mountEffect — useEffect 收集</strong><br>创建 effect 对象 <code>{ tag: HookPassive, create: fn, deps: [0], destroy: null, next }</code>，挂到 Fiber 的 <code>updateQueue</code> 环形链表，并在 Fiber 上打 <code>PassiveEffect flag</code>。effect 此时<strong>不执行</strong>，等 commit 后异步调度。",
+    diff_m:
+      "<strong>Diff 算法（首次全量 Placement）</strong><br>Diff 在 beginWork 对比新 ReactElement 与旧 Fiber（reconcileChildren）。首次渲染没有旧 Fiber，跳过比较，所有节点直接打 <code>Placement flag</code>（待插入）。Diff 的三条规则只在更新时才生效：① 只对比同层 ② type 不同销毁重建 ③ key+type 相同则复用。",
+    completework_m:
+      "<strong>completeWork — 创建离屏真实 DOM</strong><br>节点 beginWork 完成后向上执行 completeWork。原生 DOM 节点（div）在此调用 <code>createInstance</code> 创建真实 DOM 对象，<code>appendAllChildren</code> 拼接子节点，形成一棵<strong>离屏 DOM 树</strong>（还没插入 document），等 mutation 阶段一次性插入。",
+    effectlist:
+      "<strong>subtreeFlags — 副作用收集</strong><br>每个 Fiber 的 <code>flags</code> 记录自身副作用，<code>subtreeFlags</code> 记录子树副作用的并集。completeWork 阶段自下而上合并：<code>parent.subtreeFlags |= child.flags | child.subtreeFlags</code>。commit 阶段通过位运算快速跳过无副作用的子树，无需全量遍历。",
+    bm_m: "<strong>before mutation — 不改 DOM，做准备</strong><br>类组件调用 <code>getSnapshotBeforeUpdate</code>（本例无）。通过 <code>scheduleCallback(NormalPriority, flushPassiveEffects)</code> 将 useEffect 的执行推入宏任务队列，但<strong>此刻不执行</strong>，等 commit 全部结束后才跑。",
+    mut_m:
+      "<strong>mutation — 操作真实 DOM</strong><br>遍历有 flag 的 Fiber 子树。发现 HostRootFiber 子树有 <code>Placement</code>，调用 <code>container.appendChild(offscreenDom)</code>，将整棵离屏 DOM 树一次性插入页面。只触发<strong>一次</strong>浏览器重排，性能最优。",
+    lay_m:
+      "<strong>layout — DOM 就绪，浏览器未绘制</strong><br>同步调用 <code>useLayoutEffect</code>（本例无）、类组件 <code>componentDidMount</code>。然后 <code>root.current = workInProgress</code>，workInProgress 正式成为 current 树。",
+    ue_m: '<strong>useEffect 异步执行</strong><br>浏览器绘制完成后，宏任务队列里的 <code>flushPassiveEffects</code> 执行。deps <code>[count]</code> 首次 undefined→0，必定触发，执行 <code>console.log("render", 0)</code>。这就是 useEffect "在浏览器绘制后" 执行的含义。',
+    cur_m:
+      '<strong>current = workInProgress（双缓存切换）</strong><br>layout 阶段末完成指针切换。之后 workInProgress 树成为新 current，旧的 HostRootFiber 通过 alternate 保留，下次更新时作为复用基础，这是双缓存"零成本切换"的核心。',
+  };
+
+  const U = {
+    click:
+      "<strong>合成事件 SyntheticEvent</strong><br>React 在 root 上用事件委托统一绑定原生事件，click 触发时通过 Fiber 树向上模拟冒泡，找到 onClick 回调，包装成 SyntheticEvent 调用。整个过程在一次原生事件的同步任务中完成，这也是为什么在事件回调里多次 setState 能被批量合并。",
+    dispatch:
+      '<strong>dispatchSetState</strong><br>内部先做"快速通道"检查：新值与 <code>memoizedState</code> 若 <code>Object.is</code> 相等，提前 bail out。否则创建 Update 并调度。',
+    updateobj:
+      "<strong>Update 对象 { action: 1 }</strong><br>结构 <code>{ lane, action, next }</code>，action 可以是新值（<code>1</code>）或函数（<code>prev => prev+1</code>）。多个 Update 组成环形链表，保证顺序 reduce 的幂等性，即使 render 被中断重试也能得到正确结果。",
+    queue:
+      '<strong>hook.queue.pending 环形链表</strong><br>新 Update 插入链表尾，<code>pending</code> 指针指向尾节点，尾节点 <code>next</code> 指向头。这种环形结构让入队 O(1)，处理时一次"断环"即可从头遍历所有 Update，无需额外指针。',
+    lane2:
+      '<strong>Lane 优先级分配</strong><br>用户交互（click）赋予 <code>InputContinuousLane</code> 或 <code>SyncLane</code>，数值越小优先级越高。Lane 机制让 React 知道"哪个更新更紧急"，决定是否打断正在进行的低优先级 render。',
+    batch:
+      "<strong>批量更新 batchedUpdates</strong><br>React 18 自动批处理：同一事件回调内多次 setState → 只触发一次 render。React 17 只对合成事件/生命周期批处理，React 18 扩展到 setTimeout、Promise 等异步场景。底层原理：所有 setState 只是往队列加 Update，Scheduler 统一拿走一起处理。",
+    concurrent2:
+      "<strong>Concurrent 并发打断</strong><br>若此时有低优先级 render（如 <code>startTransition</code> 更新）正在时间切片中执行，新的高优先级 click 更新可以打断它：Scheduler 发信号 → Reconciler 在当前 Fiber 处理完后 yield → 优先执行高优先级任务 → 高优先级 commit 后再重新调度低优先级。",
+    wip: "<strong>克隆 workInProgress Tree</strong><br>以现有 current 树为模板克隆，通过 <code>createWorkInProgress</code> 为需要更新的 Fiber 创建 alternate（复用内存），未变更的子树直接指向 current 的节点引用，不重新分配内存。",
+    doublebuf2:
+      "<strong>Fiber 双缓存在更新中的作用</strong><br>后台在 workInProgress 树上做所有计算，current 树保持不变继续服务页面。如果 render 被高优先级打断，直接丢弃 workInProgress，current 树完好无损，用户看到的 UI 始终一致。",
+    beginwork2:
+      "<strong>beginWork — 重新执行函数组件</strong><br>dispatcher 切换为 <code>HooksDispatcherOnUpdate</code>，重新执行 App()。useState 此时调用 <code>updateState</code>，从 hooks 链表中取出对应 hook 对象，处理 queue.pending。",
+    updatestate:
+      "<strong>Hooks 更新：state 0 → 1</strong><br><code>processUpdateQueue</code> 遍历 <code>hook.queue.pending</code> 环形链表，将 action（值为 1）应用到 <code>baseState = 0</code>，得 <code>memoizedState = 1</code>。若多个 setState 合并，依次 reduce：<code>baseState → action1 → action2 → … → finalState</code>。",
+    diff2:
+      '<strong>Diff 算法 — div 复用</strong><br>新 ReactElement type="div" vs current Fiber type="div"，key 均为 null，<code>Object.is("div","div")=true</code> → 可复用。调用 <code>useFiber</code> 克隆，更新 <code>pendingProps</code>（children 变为 1）。若 type 不同则销毁重建，这也是为什么条件渲染时改变组件类型会丢失 state 的原因。',
+    effecttag:
+      "<strong>effectTag = Update（flags）</strong><br>Diff 发现 div 的 children 从 0 变为 1，在 workInProgress div Fiber 上打 <code>Update flag</code>。Fiber.flags 是位掩码，可同时携带多个副作用（<code>Update | Ref | Snapshot</code>…），commit 阶段用位运算判断需要执行哪些操作。",
+    complete2:
+      "<strong>completeWork — updatePayload</strong><br>发现 div Fiber 有 Update flag，调用 <code>prepareUpdate</code> 对比新旧 props，将需要变更的属性以 <code>[key, value]</code> 数组存入 <code>workInProgress.updateQueue</code>（即 updatePayload），mutation 阶段统一批量应用到真实 DOM。",
+    subtree:
+      '<strong>subtreeFlags 向上冒泡</strong><br>div 的 Update flag 向上合并到 App Fiber → HostRootFiber。commit 阶段从根检查 subtreeFlags，用位运算快速判断"这棵子树有没有需要处理的副作用"，有才深入，无则跳过，避免全量遍历。',
+    bm2: "<strong>before mutation — 调度 cleanup</strong><br>发现 useEffect deps 变化（[0]→[1]），将上次 effect 的 cleanup 和新 effect 的 create 加入 <code>pendingPassiveEffects</code> 异步队列。DOM 此刻还未改变。",
+    mut2: '<strong>mutation — 更新 DOM</strong><br>取出 div Fiber 的 <code>updatePayload</code>，调用 <code>commitUpdate → updateDOMProperties</code>，将 DOM 节点的 <code>textContent</code> 更新为 "1"。浏览器收到变更，安排下一帧重绘。',
+    lay2: "<strong>layout — 切换 current 指针</strong><br>执行 useLayoutEffect（本例无）。然后 <code>root.current = finishedWork</code>，workInProgress 树正式成为新 current，旧树变为 alternate，供下次更新复用。整个 DOM 更新流程至此结束，浏览器开始绘制。",
+    cleanup:
+      '<strong>useEffect cleanup</strong><br>先于新 effect 执行。本例 useEffect 回调没有 return，cleanup 为 null，跳过。若有副作用需要清理（订阅、定时器等），应在回调中 return 清理函数，React 保证"先 cleanup 旧的，再运行新的"顺序。',
+    ue2: '<strong>执行新 useEffect</strong><br>deps [0]→[1]，Object.is 不等，触发执行 <code>console.log("render", 1)</code>。若返回函数，存为 <code>effect.destroy</code>，下次更新的 before mutation 阶段再调度执行。',
+    cur2: '<strong>双缓存切换完成，旧树成为 alternate</strong><br>此轮更新结束。FiberRoot.current 已指向新树，旧 current 树通过 alternate 保留。下次 setState 时 React 再次以新 current 为基础克隆 workInProgress，如此循环，这就是 Fiber 双缓存"永远不销毁，只复用"的设计思路。',
+  };
+
+  function dm(k) {
+    document.getElementById("dm-detail").innerHTML = M[k] || "";
+  }
+  function du(k) {
+    document.getElementById("du-detail").innerHTML = U[k] || "";
+  }
+
+  function show(p) {
+    document.getElementById("p-mount").style.display =
+      p === "mount" ? "" : "none";
+    document.getElementById("p-update").style.display =
+      p === "update" ? "" : "none";
+    document
+      .querySelectorAll(".tab")
+      .forEach((t, i) =>
+        t.classList.toggle(
+          "active",
+          (i === 0 && p === "mount") || (i === 1 && p === "update"),
+        ),
+      );
+  }
+</script>
