@@ -4,303 +4,199 @@ date: "2026-04-12"
 tags: "interview"
 ---
 
-## 前言
+# new
 
-面试中大概率会出现手写代码的情况，但是对我来说，面试的情况下完成一个完善的手写是比较困难的，所以本篇文章每个手写都会有面试版和完善版两个版本，面试版一般是争取用最少代码完成主要功能以及主要知识点的覆盖，完善版就是扣一些细节(细节可能也有很多)多一些一些特殊情况和边界条件的考虑
+```js
+// 1.创建新对象
+// 2.新对象的 **proto** 指向构造函数的 prototype
+// 3. 构造函数的 this 指向 新对象
+// 4.根据返回值判断返回的是新对象还是构造函数返回的对象
 
-## 手写 new 操作符
-
-**面试版**
-
-```javascript
-const _new = (fn, ...args) => {
+const _new = (fn, ...rest) => {
   const newObj = Object.create(fn.prototype);
-  fn.call(newObj, ...args);
-  return newObj;
+  const result = fn.apply(newObj, rest);
+  return result instanceof Object ? result : newObj;
 };
 ```
 
-**完善版**
+# Promise
 
-```javascript
-const _new = (fn, ...args) => {
-  const newObj = Object.create(fn.prototype);
-  const returnVal = fn.call(newObj, ...args);
-  return returnVal instanceof Object ? returnVal : newObj;
-};
-```
-
-测试
-
-```javascript
-function Foo(x, y) {
-  this.name = x;
-  this.age = y;
+```js
+// 值透传
+class MyPromise {
+  constructor(fn) {
+    this.value = undefined;
+    const resolve = (val) => {
+      this.value = val;
+    };
+    fn(resolve);
+  }
+  then(fn) {
+    fn(this.value);
+  }
 }
 
-const obj1 = _new(Foo, "小明", 18);
-const obj2 = new Foo("小明", 18);
-console.log(obj1, obj2);
-```
+const p = new MyPromise((resolve) => {
+  resolve(1);
+});
 
-## 手写 call 方法
+p.then((res) => {
+  console.log(res);
+});
 
-**面试版**
+// 状态机
 
-```javascript
-Function.prototype.myCall = function (thisArg, ...args) {
-  thisArg = thisArg ?? window;
-  thisArg.fn = this; // this === Function.prototype
-  const result = thisArg.fn(...args);
-  delete thisArg.fn;
-  return result;
-};
-```
-
-**完善版**
-
-```javascript
-Function.prototype.myCall = function (thisArg, ...args) {
-  thisArg = thisArg ?? window;
-  thisArg = Object(thisArg);
-  const fn = Symbol();
-  thisArg[fn] = this;
-  const result = thisArg[fn](...args);
-  delete thisArg[fn];
-  return result;
-};
-```
-
-测试
-
-```javascript
-const obj = {
-  a: 2,
-  fun: function (x) {
-    console.log(x);
-    return this.a;
-  },
-};
-
-const cObj = {
-  a: 200,
-};
-
-console.log(obj.fun(1));
-console.log(obj.fun.call(cObj, 100));
-console.log(obj.fun.myCall(cObj, 100));
-```
-
-## 手写 bind 方法
-
-**面试版**
-
-```javascript
-Function.prototype.myBind = function (thisArg, ...arg) {
-  const fn = this;
-  function Fn() {
-    return fn.call(thisArg, ...arg);
-  }
-  return Fn;
-};
-```
-
-**完善版**
-
-```javascript
-Function.prototype.myBind = function (thisArg, ...arg1) {
-  thisArg = thisArg ?? window;
-  thisArg = Object(thisArg);
-  const originFn = this;
-  function Fn(...arg2) {
-    const objThis = this instanceof Fn ? this : Object(thisArg);
-    return originFn.call(objThis, ...arg1, ...arg2);
-  }
-  if (originFn.prototype) {
-    Fn.prototype = originFn.prototype;
-  }
-  return Fn;
-};
-```
-
-测试
-
-```javascript
-const obj = {
-  x: 42,
-  getX: function () {
-    return this.x;
-  },
-};
-
-const unboundGetX = obj.getX;
-console.log(unboundGetX());
-const boundGetX = unboundGetX.bind(obj);
-console.log(boundGetX());
-const boundGetY = unboundGetX.myBind(obj);
-console.log(boundGetY());
-```
-
-## 手写 apply 方法
-
-**面试版**
-
-```javascript
-Function.prototype.myApply1 = function (thisArg, args) {
-  thisArg = thisArg ?? window;
-  thisArg.fn = this; // this === Function.prototype
-  args = Array.from(args);
-  const result = thisArg.fn(...args);
-  delete thisArg.fn;
-  return result;
-};
-```
-
-**完善版**
-
-_提示: 从数组和类数组对象做判断_
-
-## 手写 深拷贝
-
-**面试版**
-
-```javascript
-const deepCopy1 = (obj) => {
-  if (typeof obj !== "object") return obj;
-
-  let newObj = Array.isArray(obj) ? [] : {};
-
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] === "object") {
-        newObj[key] = deepCopy1(obj[key]);
-      } else {
-        newObj[key] = obj[key];
+class MyPromise2 {
+  constructor(fn) {
+    this.value = undefined;
+    this.state = "pending";
+    const resolve = (val) => {
+      if (this.state === "pending") {
+        this.value = val;
+        this.state = "fulfilled";
       }
+    };
+    fn(resolve);
+  }
+  then(fn) {
+    if (this.state === "fulfilled") {
+      fn(this.value);
     }
   }
-  return newObj;
-};
-```
+}
 
-**完善版**
+const p2 = new MyPromise2((resolve) => {
+  resolve(1);
+  resolve(2);
+  resolve(3);
+});
 
-```javascript
-const deepCopy = (obj, cache = new WeakMap()) => {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
+p2.then((res) => {
+  console.log(res);
+});
+
+// 回调队列
+class MyPromise3 {
+  constructor(fn) {
+    this.value = undefined;
+    this.state = "pending";
+    this.waiters = [];
+
+    const resolve = (val) => {
+      if (this.state === "pending") {
+        this.value = val;
+        this.state = "fulfilled";
+        this.waiters.forEach((fn) => fn(this.value));
+      }
+    };
+    fn(resolve);
   }
-  if (cache.has(obj)) {
-    // 循环引用
-    return cache.get(obj);
-  }
-
-  let newObj = Array.isArray(obj) ? [] : {};
-
-  cache.set(obj, newObj);
-
-  Reflect.ownKeys(obj).forEach((key) => {
-    if (obj[key] === null || typeof obj[key] !== "object") {
-      newObj[key] = obj[key];
+  then(fn) {
+    if (this.state === "fulfilled") {
+      fn(this.value);
     } else {
-      newObj[key] = deepCopy(obj[key], cache);
+      this.waiters.push(fn);
     }
-  });
-
-  return newObj;
-};
-```
-
-测试
-
-```javascript
-const obj = {
-  a: "123",
-  c: {
-    a: "1",
-  },
-};
-
-const cObj = deepCopy(obj);
-console.log(cObj);
-```
-
-## 手写 promise 方法
-
-**面试版**
-
-```javascript
-function Promise(fn) {
-  this.cbs = [];
-
-  const resolve = (value) => {
-    setTimeout(() => {
-      this.data = value;
-      this.cbs.forEach((cb) => cb(value));
-    });
-  };
-
-  fn(resolve);
+  }
 }
 
-Promise.prototype.then = function (onResolved) {
-  return new Promise((resolve) => {
-    this.cbs.push(() => {
-      const res = onResolved(this.data);
-      if (res instanceof Promise) {
-        res.then(resolve);
+const p3 = new MyPromise3((resolve) => setTimeout(() => resolve(1), 1000));
+
+p3.then((res) => {
+  console.log(res);
+});
+
+// 链式调用
+class MyPromise4 {
+  constructor(fn) {
+    this.value = undefined;
+    this.state = "pending";
+    this.waiters = [];
+
+    const resolve = (val) => {
+      if (this.state === "pending") {
+        this.value = val;
+        this.state = "fulfilled";
+        this.waiters.forEach((fn) => fn(this.value));
+      }
+    };
+    fn(resolve);
+  }
+  then(fn) {
+    return new MyPromise4((resolve) => {
+      const handleFn = (val) => {
+        fn = typeof fn === "function" ? fn : (v) => v;
+        const res = fn(val);
+        if (res instanceof MyPromise4) {
+          res.then(resolve);
+        } else {
+          resolve(res);
+        }
+      };
+
+      if (this.state === "fulfilled") {
+        handleFn(this.value);
       } else {
-        resolve(res);
+        this.waiters.push(handleFn);
       }
     });
-  });
-};
-```
+  }
+}
 
-_核心：then 方法链式调用_
+const p4 = new MyPromise4((resolve) => resolve(1))
+  .then((res) => res + 1)
+  .then((res) => {
+    console.log(res);
+    return res;
+  })
+  .then(null);
 
-**完善版**
+p4.then((res) => console.log(res));
 
-```
-// TODO
-```
+// 微任务
+class MyPromise5 {
+  constructor(fn) {
+    this.value = undefined;
+    this.state = "pending";
+    this.waiters = [];
 
-## 防抖
+    const resolve = (val) => {
+      if (this.state === "pending") {
+        this.value = val;
+        this.state = "fulfilled";
+        this.waiters.forEach((fn) => queueMicrotask(() => fn(this.value)));
+      }
+    };
+    fn(resolve);
+  }
+  then(fn) {
+    return new MyPromise5((resolve) => {
+      const handleFn = (val) => {
+        fn = typeof fn === "function" ? fn : (v) => v;
+        const res = fn(val);
+        if (res instanceof MyPromise5) {
+          res.then(resolve);
+        } else {
+          resolve(res);
+        }
+      };
 
-**面试版**
+      if (this.state === "fulfilled") {
+        queueMicrotask(() => handleFn(this.value));
+      } else {
+        this.waiters.push(handleFn);
+      }
+    });
+  }
+}
 
-```javascript
-const debounce = (fn, delay) => {
-  let timer = null;
+const p5 = new MyPromise5((resolve) => resolve(1))
+  .then((res) => res + 1)
+  .then((res) => {
+    console.log(res);
+    return res;
+  })
+  .then(null);
 
-  return function () {
-    if (timer) {
-      clearTimeout(timer);
-    }
-    timer = setTimeout(() => {
-      fn.apply(this, arguments);
-      timer = null;
-    }, delay);
-  };
-};
-```
-
-## 节流
-
-**面试版**
-
-```javascript
-const throttle = (fn, delay) => {
-  let timer = null;
-
-  return function () {
-    if (timer) {
-      return;
-    }
-    timer = setTimeout(() => {
-      fn.apply(this, arguments);
-      timer = null;
-    }, delay);
-  };
-};
+p5.then((res) => console.log(res));
 ```
