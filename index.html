@@ -3,10 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/logo.jpeg" />
+    <link rel="alternate" type="text/markdown" title="Markdown version" href="/sexxion-blog/index.md" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sexxion-blog</title>
+    <style>
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    </style>
   </head>
   <body>
+    <div class="visually-hidden" aria-hidden="true">
+      A Markdown version of this page is available at
+      /sexxion-blog/index.md — optimized for AI and LLM tools.
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
