@@ -11,7 +11,7 @@ type Frontmatter = {
   tags?: string
 }
 
-const markdownModules = import.meta.glob('../../public/**/*.md', {
+const markdownModules = import.meta.glob('../../blogs/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -35,7 +35,7 @@ function parsePost(path: string, raw: string): BlogPost {
     readingTime: estimateReadingTime(content),
     markdown: content,
     toc: extractToc(content),
-    assetBasePath: `/${slug}/`,
+    assetBasePath: `/blogs/${slug}/`,
   }
 }
 
@@ -105,14 +105,16 @@ function slugify(value: string) {
 
 function deriveSlug(path: string) {
   const normalized = path.replace(/\\/g, '/')
-  const segments = normalized.split('/')
-  const filename = segments.at(-1)?.replace(/\.md$/, '') ?? 'post'
+  const blogsPath = normalized.split('/blogs/')[1] ?? normalized
+  const withoutExt = blogsPath.replace(/\.md$/, '')
+  const segments = withoutExt.split('/').filter(Boolean)
 
-  if (filename === 'index' && segments.length > 1) {
-    return segments.at(-2) ?? 'post'
+  if (segments.at(-1) === 'index') {
+    const slugSegments = segments.slice(0, -1)
+    return slugSegments.join('/') || 'post'
   }
 
-  return filename
+  return segments.join('/') || 'post'
 }
 
 function splitTags(value?: string) {

@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "pnpm sync:blogs && tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:blogs": "rm -rf public/blogs && cp -R blogs public/blogs"
   },
   "dependencies": {
     "mdast-util-to-string": "^4.0.0",
